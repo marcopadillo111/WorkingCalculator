@@ -1,7 +1,6 @@
-
 const calculatorWidthInPixels = 360;
 const calculatorHeightInPixels = 550;
-    
+
 function calculateZoomLevel() {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
@@ -19,48 +18,113 @@ window.addEventListener('resize', calculateZoomLevel);
 
 // FUNCTIONS
 
+const container = document.getElementById('con');
+
+let mainDisplay = document.getElementById("mainText");
+let subDisplay = document.getElementById("subText");
+
 let currentInput = "";
-let currentOperator = "";
+
+
+function lastChar(string, i) {
+    temp = currentInput.charAt(currentInput.length - i)
+    return temp;
+}
+
+function updateDisplay(display, string) {
+    display.textContent = string.toLocaleString("en-US");
+}
+
+function subTotal() {
+    if (!/^[.0]?\d+$/.test(currentInput)) {
+        temp = convertDisplay(currentInput);
+        const result = eval(temp);
+        updateDisplay(subDisplay, result);
+    }
+}
+
+function convertDisplay(string) {
+    let convertedDisplay = string;
+    const replacements = {
+        "×": "*",
+        "÷": "/"
+    };
+    for (const currentOps in replacements) {
+        if (string.includes(currentOps)) {
+            convertedDisplay = convertedDisplay.replace(new RegExp(currentOps, 'g'), replacements[currentOps]);
+        }
+    }
+    return convertedDisplay;
+}
 
 function clearInput() {
     currentInput = "";
-    currentOperator = "";
-    document.getElementById('mainText').textContent = '';
+    mainDisplay.textContent = "";    
+    subDisplay.textContent = "";
+}
+
+function removeLast() {
+    currentInput = currentInput.slice(0, -1);
+    updateDisplay(mainDisplay, currentInput);
+    if (currentInput.length == 0) {
+        return;
+    }
+    
+    if (!isNaN(lastChar(currentInput, 1))) {
+        subTotal();
+    } else {
+        subDisplay.textContent = "";
+    }
 }
 
 function appendNumber(number) {
+    if (container.scrollWidth > container.clientWidth) {
+        return;
+    }
+
+    if (number == "." && lastChar(currentInput, 1) == ".") {
+        return;
+    }
+    if (currentInput.length == 1 && number == 0) {
+        return;
+    }
+    
     currentInput += number;
-    document.getElementById('mainText').textContent = currentInput;
+    updateDisplay(mainDisplay, currentInput);
 }
 
-function add() {
-    currentOperator = "+";
-    currentInput += currentOperator;
-    document.getElementById('mainText').textContent = currentInput;
-}
+function appendOperator(operator) {
+    if (container.scrollWidth > container.clientWidth) {
+        return;
+    }
 
-function minus() {
-    currentOperator = "-";
-    currentInput += currentOperator;
-    document.getElementById('mainText').textContent = currentInput;
-}
-
-function multiply() {
-    currentOperator = "*";
-    currentInput += currentOperator;
-    document.getElementById('mainText').textContent = currentInput;
-}
-
-function divide() {
-    currentOperator = "/";
-    currentInput += currentOperator;
-    document.getElementById('mainText').textContent = currentInput;
+    if (currentInput == "" && operator !== "-") {
+        return;
+    }
+    if (isNaN(lastChar(currentInput, 1))) {
+        let tempArray = currentInput.split("");
+        tempArray[tempArray.length - 1] = operator;
+        currentInput = tempArray.join("");
+        updateDisplay(mainDisplay, currentInput);
+        return;
+    }
+    currentInput += operator;
+    updateDisplay(mainDisplay, currentInput);
+    subDisplay.textContent = "";
 }
 
 function calculate() {
-    const result = eval(currentInput);
-    document.getElementById('mainText').textContent = result;
-    currentInput.toString();
-    currentOperator = '';
+    if (isNaN(lastChar(currentInput, 1))) {
+        currentInput = currentInput.slice(0, -1);
+    }
+
+    if (currentInput.length > 0) {
+        currentInput = convertDisplay(currentInput);
+        const result = eval(currentInput);
+        updateDisplay(mainDisplay, result);
+        currentInput = result.toString();
+        subDisplay.textContent = "";
+    }
 }
+
 
