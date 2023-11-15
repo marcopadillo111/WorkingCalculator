@@ -85,9 +85,6 @@ function appendNumber(number) {
     if (number == "." && lastChar(currentInput, 1) == ".") {
         return;
     }
-    if (currentInput.length == 1 && number == 0) {
-        return;
-    }
     
     currentInput += number;
     updateDisplay(mainDisplay, currentInput);
