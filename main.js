@@ -95,9 +95,16 @@ function appendOperator(operator) {
         return;
     }
 
-    if (currentInput == "" && operator !== "-") {
+    if (currentInput.length == 0 && operator !== "-") {
         return;
     }
+
+    if (currentInput.length == 1 && currentInput == "-" && operator !== "-") {
+        currentInput = "";
+        updateDisplay(mainDisplay, currentInput);
+        return;
+    }
+    
     if (isNaN(lastChar(currentInput, 1))) {
         let tempArray = currentInput.split("");
         tempArray[tempArray.length - 1] = operator;
